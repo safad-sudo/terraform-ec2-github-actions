@@ -6,25 +6,30 @@ resource "aws_instance" "web_server" {
   associate_public_ip_address = true
 
   user_data = <<-EOF
-    #!/bin/bash
-    set -eux
+  #!/bin/bash
+  exec > /var/log/user-data.log 2>&1
+  set -eux
 
-    apt-get update -y
- 
-  # Install Docker
-    apt-get install -y docker.io
+  echo "=== USER DATA START ==="
 
-    systemctl start docker
-    systemctl enable docker
+  apt-get update -y
 
-  # Allow ubuntu user to run docker
-    usermod -aG docker ubuntu
+  apt-get install -y docker.io
 
-  # Pull and run the web app
-    docker pull YOUR_DOCKERHUB_USERNAME/django-backend:v1
-    docker run -d -p 8000:8000 --restart=always \
-      YOUR_DOCKERHUB_USERNAME/django-backend:v1
+  systemctl daemon-reload
+  systemctl start docker
+  systemctl enable docker
+
+  docker --version
+
+  docker pull muhammadsafad/django-backend:v1
+
+  docker run -d -p 8000:8000 --restart=always \
+    muhammadsafad/django-backend:v1
+
+  echo "=== USER DATA END ==="
   EOF
+
 
 
   tags = {
