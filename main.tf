@@ -6,26 +6,26 @@ resource "aws_instance" "web_server" {
   associate_public_ip_address = true
 
   user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
+    #!/bin/bash
+    set -eux
 
-              # Install Docker
-              amazon-linux-extras install docker -y
-              systemctl start docker
-              systemctl enable docker
-              usermod -aG docker ec2-user
+    apt-get update -y
+ 
+  # Install Docker
+    apt-get install -y docker.io
 
-              # Install Git
-              yum install git -y
+    systemctl start docker
+    systemctl enable docker
 
-              # Pull your Docker image (CHANGE THIS)
-              docker pull muhammadsafad/django-backend:v1
+  # Allow ubuntu user to run docker
+    usermod -aG docker ubuntu
 
-              # Run container
-              docker run -d -p 8000:8000 \
-                --restart=always \
-                muhammadsafad/django-backend:v1
-              EOF
+  # Pull and run the web app
+    docker pull YOUR_DOCKERHUB_USERNAME/django-backend:v1
+    docker run -d -p 8000:8000 --restart=always \
+      YOUR_DOCKERHUB_USERNAME/django-backend:v1
+  EOF
+
 
   tags = {
     Name = "GitHubActions-WebApp"
